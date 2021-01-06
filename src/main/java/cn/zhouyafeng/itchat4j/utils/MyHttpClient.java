@@ -112,7 +112,10 @@ public class MyHttpClient {
 					httpGet.setHeader(entry.getKey(), entry.getValue());
 				}
 			}
+			long s = System.currentTimeMillis();
 			CloseableHttpResponse response = httpClient.execute(httpGet);
+			s = System.currentTimeMillis() - s;
+			logger.info("============spend time: " + s);
 			entity = response.getEntity();
 		} catch (ClientProtocolException e) {
 			logger.info(e.getMessage());

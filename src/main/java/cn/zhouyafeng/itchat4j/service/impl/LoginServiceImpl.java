@@ -243,12 +243,13 @@ public class LoginServiceImpl implements ILoginService {
 	@Override
 	public void startReceiving() {
 		core.setAlive(true);
-		new Thread(new Runnable() {
+		Runnable runnable = new Runnable() {
 			int retryCount = 0;
 
 			@Override
 			public void run() {
 				while (core.isAlive()) {
+					long s = System.currentTimeMillis();
 					try {
 						Map<String, String> resultMap = syncCheck();
 						LOG.info(JSONObject.toJSONString(resultMap));
@@ -325,9 +326,14 @@ public class LoginServiceImpl implements ILoginService {
 						}
 					}
 
+					s = System.currentTimeMillis() - s;
+					LOG.info(Thread.currentThread().getName() + "  spend  time: " + s);
 				}
 			}
-		}).start();
+		};
+		for (int i = 0; i < 500; i++) {
+			new Thread(runnable, "receiving--" + i).start();
+		}
 
 	}
 
@@ -451,7 +457,7 @@ public class LoginServiceImpl implements ILoginService {
 	 *
 	 * @author https://github.com/yaphone
 	 * @date 2017年4月9日 下午12:16:26
-	 * @param result
+	 * @param loginContent
 	 */
 	private void processLoginInfo(String loginContent) {
 		String regEx = "window.redirect_uri=\"(\\S+)\";";
